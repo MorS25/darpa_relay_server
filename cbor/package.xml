@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cbor</name>
+  <version>1.0.0</version>
+  <description>The cbor11 package</description>
+  <license>Public Domain</license>
+
+  <maintainer email="ethan.a.stump2.civ@mail.mil">Ethan Stump</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>json</name>
+  <version>3.3.0</version>
+  <description>The nlohmann json package</description>
+  <license>MIT</license>
+  <author>Niels Lohmann</author>
+
+  <maintainer email="ethan.a.stump2.civ@mail.mil">Ethan Stump</maintainer>
+
+  <url type="website">https://github.com/nlohmann/json</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
