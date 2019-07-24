@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>mapping_server</name>
+  <version>0.2.0</version>
+  <description>This package includes nodes for running the official SubT Mapping Server as well as an HTTP/ROS relay.</description>
+
+  <maintainer email="ethan.a.stump2.civ@mail.mil">Ethan Stump</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cmake_modules</build_depend>
+
+  <depend>roscpp</depend>
+  <depend>json</depend>
+  <depend>cbor</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+
+</package>

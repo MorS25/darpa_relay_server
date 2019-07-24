@@ -1,0 +1,34 @@
+<launch>
+
+  <!-- mapping_server_ip: The IP address of the mapping server -->
+  <!-- Default: 10.100.2.201, which is the expected IP address at actual SubT events. -->
+  <arg name="mapping_server_ip" default="10.100.2.201" />
+
+  <!-- token: The private token assigned to each team -->
+  <!-- Default: DARPA test token -->
+  <arg name="token" default="FKDzKcNTugczqkpC"/>
+
+  <!-- grid_topic: The topic to subscribe to that is publishing nav_msgs/OccupancyGrid.msgs -->
+  <arg name="grid_topic" default="slam/grid" />
+
+  <!-- cloud_topic: The topic to subscribe to that is publishing sensor_msgs/PointCloud2.msgs -->
+  <arg name="cloud_topic" default="slam/cloud" />
+
+  <!-- pose_array_topic: The topic to subscribe to that is publishing geometry_msgs/PoseArray.msgs -->
+  <arg name="pose_array_topic" default="poses"/>
+
+  <!-- marker_array_topic: The topic to subscribe to that is publishing visualization_msgs/MarkerArray.msgs -->
+  <arg name="marker_array_topic" default="marker_array"/>
+
+  <node pkg="mapping_relay" type="mapping_relay.py" name="mapping_relay" output="screen">
+    <param name="token" value="$(arg token)" />
+    <param name="map_url" value="http://$(arg mapping_server_ip):8000/map/update" />
+    <param name="state_url" value="http://$(arg mapping_server_ip):8000/state/update"/>
+    <param name="marker_url" value="http://$(arg mapping_server_ip):8000/markers/update"/>
+     <!-- <param name="compression" value="none" /> -->
+    <remap from="grid" to="$(arg grid_topic)" />
+    <remap from="cloud" to="$(arg cloud_topic)" />
+    <remap from="poses" to="$(arg pose_array_topic)"/>
+    <remap from="marker_array" to="$(arg marker_array_topic)"/>
+  </node>
+</launch>

@@ -1,0 +1,24 @@
+<launch>
+
+  <!-- token: The private token assigned to each team -->
+  <!-- Default: DARPA test token -->
+  <arg name="token" default="FKDzKcNTugczqkpC"/>
+
+  <!-- bagdir: The directory to store logged mapping/telemetry messages in -->
+  <!-- Default: "./" makes rosbag use it's default output directory (~/.ros/) -->
+  <arg name="bagdir" default="$(env HOME)/mapping_server_bags/"/>
+
+  <!-- teamname: The team name, which will be prepended to all log files -->
+  <arg name="teamname" default="DARPA"/>
+
+  <node pkg="mapping_server" type="mapping_server_node" name="mapping_server" output="screen" respawn="true">
+    <param name="port" value="8000" />
+    <param name="token" value="$(arg token)" />
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz"
+    args="-d $(find mapping_server)/config/mapping_server.rviz -f darpa" />
+
+  <node pkg="rosbag" type="record" name="mapping_server_bagger"
+    args="-o $(arg bagdir)$(arg teamname) /cloud /grid /tf /poses /labels" />
+</launch>
