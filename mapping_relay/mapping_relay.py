@@ -140,6 +140,10 @@ class CommandPostRelay(object):
         rospy.loginfo('Relaying grid message with stamp ' + str(msg.header.stamp))
         # For ROS in python2: reintepret tuple of ints as proper byte array
         if not _IS_PY3:
+            msg.data = list(msg.data)
+            for i in range(len(msg.data)):
+              if msg.data[i] < 0:          
+                msg.data[i] = 256 + msg.data[i]
             msg.data = str(bytearray(msg.data))
         # Transform message into a dictionary for easy modification
         msg = nested(msg)
