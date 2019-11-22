@@ -479,6 +479,8 @@ int main(int argc, char **argv)
 
   size_t last_markers_size = 0;
   size_t last_markers_size2 = 0;
+  ros::Time last_cloud_time(0.0);
+
   // ------------------------------------------------------------
   // Map and telemetry content handlers
   // ------------------------------------------------------------
@@ -503,6 +505,12 @@ int main(int argc, char **argv)
       unpack_cloud(content, cloud);
       ROS_INFO_STREAM("  -> Received cloud message with stamp " << cloud.msg.header.stamp << " and size " << cloud.msg.data.size());
       cloud_pub.publish(cloud.msg);
+      // Check time between messages
+      ros::Time curr_time = ros::Time::now();
+      if((curr_time - last_cloud_time).toSec() < 1) {
+            throw TooManyRequests("Cloud updates too frequent. Reduce to <1Hz.");
+      }
+      last_cloud_time = curr_time;
     }
     else
     {

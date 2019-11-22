@@ -19,6 +19,6 @@
   <node pkg="rviz" type="rviz" name="rviz"
     args="-d $(find mapping_server)/config/mapping_server.rviz -f darpa" />
 
-  <node pkg="rosbag" type="record" name="mapping_server_bagger"
-    args="-o $(arg bagdir)$(arg teamname) /cloud /grid /tf /poses /labels" />
+  <node pkg="rosbag" type="record" name="mapping_server_bagger" respawn="true"
+    args="-o $(arg bagdir)$(arg teamname) /cloud /grid /tf /poses /labels /markers" />
 </launch>
