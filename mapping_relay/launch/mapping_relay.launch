@@ -18,7 +18,7 @@
   <arg name="pose_array_topic" default="poses"/>
 
   <!-- marker_array_topic: The topic to subscribe to that is publishing visualization_msgs/MarkerArray.msgs -->
-  <arg name="marker_array_topic" default="marker_array"/>
+  <arg name="marker_array_topic" default="markers"/>
 
   <node pkg="mapping_relay" type="mapping_relay.py" name="mapping_relay" output="screen">
     <param name="token" value="$(arg token)" />

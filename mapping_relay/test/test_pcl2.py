@@ -11,7 +11,7 @@ from std_msgs.msg import Header
 def test_cloud():
 	publisher = rospy.Publisher('slam/cloud', PointCloud2, queue_size=10)
 	rospy.init_node('test_pcl2')
-	rate = rospy.Rate(5)
+	rate = rospy.Rate(0.5)
 	while not rospy.is_shutdown():
 		header = Header()
 		header.stamp = rospy.Time.now()
