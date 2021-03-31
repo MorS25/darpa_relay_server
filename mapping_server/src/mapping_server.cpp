@@ -609,11 +609,17 @@ int main(int argc, char **argv)
     // Unpack platform names
     TelemetryNames names;
     unpack(content, names);
+    bool missing_name = false;
     if (poses.poses.size() != names.poses.size())
       throw UnprocessableEntity("Number of poses and number of names don't match.");
-    for (size_t i = 0; i < names.poses.size(); ++i)
+    for (size_t i = 0; i < names.poses.size(); ++i) 
+    {
       if (names.poses[i].name.empty())
+      {
         names.poses[i].name = "robot" + std::to_string(i+1);
+	missing_name = true;
+      }
+    }
 
     // Publish the pose array
     poses_pub.publish(poses);
@@ -692,6 +698,10 @@ int main(int argc, char **argv)
     // Remember this marker count
     last_markers_size = markers.markers.size();
     markers_pub.publish(markers);
+
+    // Throw an error if one of the poses is missing a name
+    if(missing_name)
+      	throw UnprocessableEntity("Telemetry is missing a name");
   };
 
   // ------------------------------------------------------------
