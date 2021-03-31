@@ -134,7 +134,7 @@ class CommandPostRelay(object):
         self.pose_subs = []
         self.poses = nested(PoseArray(poses=[Pose()] * len(self.robot_names)))
         for i, robot_name in enumerate(self.robot_names, start=0):
-            self.pose_subs.append( { robot_name: rospy.Subscriber('poses/'+robot_name, PoseStamped, self.handle_pose, (i, robot_name)) } )
+            self.pose_subs.append(rospy.Subscriber('poses/'+robot_name, PoseStamped, self.handle_pose, (i, robot_name.decode("utf-8", "ignore"))))
             self.poses[u'poses'][i]['name'] = robot_name
         
         # Marker subscription
