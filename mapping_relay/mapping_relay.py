@@ -192,6 +192,8 @@ class CommandPostRelay(object):
         if len(msg[u'poses']) == len(self.robot_names):
             for i, robot_name in enumerate(self.robot_names, start=0):
                 msg[u'poses'][i][u'name'] = robot_name.decode("utf-8", "ignore")
+        else: 
+            rospy.logerr('Number of poses (' + str(len(msg[u'poses'])) + ') does not equal number of robot names ('+ str(len(self.robot_names)) + ')')
         # Send message
         self.send_plain_msg(u'PoseArray', msg, self.state_url)
 
