@@ -229,6 +229,7 @@ namespace meta
   {
     return members
       ( member("type", &MapUpdate::type)
+      , member("name", &MapUpdate::name)
       );
   }
 
