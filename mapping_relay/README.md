@@ -35,3 +35,8 @@ The mapping\_relay subscribes to several topics for reading occupancy grids, poi
 
 This relay node does not correctly deal with the coordinate frames as required by the ICD, Section 6.1.  In particular, map messages have their `frame_id` field simply overwritten to the required value of `"darpa"` to pass checks on the server-side.
 
+## Test Publishing
+
+The python scripts in the `test` folder can be used to publish randomized point cloud, grid, telemetry, and marker ROS messages. 
+
+The SubT logo is also provided as a test point cloud which can be published using `roslaunch mapping\_relay test\_logo.launch`. 

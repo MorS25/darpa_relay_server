@@ -541,7 +541,6 @@ int main(int argc, char **argv)
       // Check time between messages
       ros::Time curr_time = ros::Time::now();
       if((curr_time - last_cloud_time).toSec() < 1) {
-	    ROS_WARN("  -> Cloud updates too frequent, >1Hz");
             throw TooManyRequests("Cloud updates too frequent. Reduce to <1Hz.");
       }
       last_cloud_time = curr_time;
