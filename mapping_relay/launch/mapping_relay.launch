@@ -19,6 +19,9 @@
 
   <!-- marker_array_topic: The topic to subscribe to that is publishing visualization_msgs/MarkerArray.msgs -->
   <arg name="marker_array_topic" default="markers"/>
+  
+  <!-- robot_names: The list of robot names which will be subscribed to as /cloud/<robot_name_1>, /grid/<robot_name_1>, /poses/<robot_name_1> ... for N robot_names -->
+  <arg name="robot_names" default="[robot1, robot2, robot3]"/>
 
   <node pkg="mapping_relay" type="mapping_relay.py" name="mapping_relay" output="screen">
     <param name="token" value="$(arg token)" />
@@ -26,6 +29,7 @@
     <param name="state_url" value="http://$(arg mapping_server_ip):8000/state/update"/>
     <param name="marker_url" value="http://$(arg mapping_server_ip):8000/markers/update"/>
      <!-- <param name="compression" value="none" /> -->
+    <rosparam param="robot_names" subst_value="True">$(arg robot_names)</rosparam>
     <remap from="grid" to="$(arg grid_topic)" />
     <remap from="cloud" to="$(arg cloud_topic)" />
     <remap from="poses" to="$(arg pose_array_topic)"/>
