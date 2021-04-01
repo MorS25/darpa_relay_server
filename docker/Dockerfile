@@ -23,6 +23,9 @@ RUN apt-get install ros-melodic-rviz -q -y
 # Install Eigen3
 RUN apt-get install libeigen3-dev
 
+# Install build-essential
+RUN apt-get install -y build-essential
+
 # Set the user
 USER $USERNAME
 

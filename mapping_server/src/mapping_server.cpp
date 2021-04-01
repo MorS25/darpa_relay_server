@@ -500,9 +500,13 @@ int main(int argc, char **argv)
       unpack_grid(content, grid);
       ROS_INFO_STREAM("  -> Received grid message with stamp " << grid.msg.header.stamp << " and size " << grid.msg.data.size());
       std::string robot_name = type.name;
-      // Sanitize input to remove non alphanumeric characters from robot name
-      robot_name.erase(std::remove_if(robot_name.begin(), robot_name.end(),
+      std::string err_str;
+      if (!ros::names::validate(robot_name, err_str)) {
+      	// Sanitize input to remove non alphanumeric characters from robot name
+	ROS_WARN("Grid name is not ROS compatible.");
+      	robot_name.erase(std::remove_if(robot_name.begin(), robot_name.end(),
                                       []( auto const& c ) -> bool { return !std::isalnum(c); } ), robot_name.end());
+      }
       grid.msg.header.frame_id = "darpa"; // Only allowed frame is darpa
       if (robot_name.size() > 0) {
         std::stringstream ss;
@@ -522,9 +526,13 @@ int main(int argc, char **argv)
       unpack_cloud(content, cloud);
       ROS_INFO_STREAM("  -> Received cloud message with stamp " << cloud.msg.header.stamp << " and size " << cloud.msg.data.size());
       std::string robot_name = type.name;
-      // Sanitize input to remove non alphanumeric characters
-      robot_name.erase(std::remove_if(robot_name.begin(), robot_name.end(),
+      std::string err_str;
+      if (!ros::names::validate(robot_name, err_str)) {
+      	// Sanitize input to remove non alphanumeric characters
+	ROS_WARN("Cloud name is not ROS compatible.");
+      	robot_name.erase(std::remove_if(robot_name.begin(), robot_name.end(),
                                       []( auto const& c ) -> bool { return !std::isalnum(c); } ), robot_name.end());
+      }
       cloud.msg.header.frame_id = "darpa";  // Only frame "darpa" is allowed
       if (robot_name.size() > 0) {
         std::stringstream ss;
