@@ -561,9 +561,9 @@ int main(int argc, char **argv)
   auto marker_update = [&](auto& content)
   {
     visualization_msgs::MarkerArray markers;
-    ROS_INFO_STREAM("  -> Received MarkerArray message with " << markers.markers.size() << " markers");
     visualization_msgs::MarkerArray markers_to_send;
     unpack(content, markers);
+    ROS_INFO_STREAM("  -> Received MarkerArray message with " << markers.markers.size() << " markers");
     // Clear out the rest of the labels (in case poses were deleted)
     // Also check for incorrect frame.
     bool incorrect_frame = false;
