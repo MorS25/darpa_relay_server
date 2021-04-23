@@ -469,9 +469,11 @@ int main(int argc, char **argv)
   // 2D representations
   auto grid_pub = nh.advertise<nav_msgs::OccupancyGrid>(
       "grid", 1, true);
+  std::map<std::string, ros::Publisher> grid_pubs;
   // 3D representations
   auto cloud_pub = nh.advertise<sensor_msgs::PointCloud2>(
       "cloud", 1, true);
+  std::map<std::string, ros::Publisher> cloud_pubs;
 
   // ------------------------------------------------------------
   // State
@@ -479,6 +481,8 @@ int main(int argc, char **argv)
 
   size_t last_markers_size = 0;
   size_t last_markers_size2 = 0;
+  ros::Time last_cloud_time(0.0);
+
   // ------------------------------------------------------------
   // Map and telemetry content handlers
   // ------------------------------------------------------------
@@ -495,14 +499,59 @@ int main(int argc, char **argv)
       MapUpdateGrid grid;
       unpack_grid(content, grid);
       ROS_INFO_STREAM("  -> Received grid message with stamp " << grid.msg.header.stamp << " and size " << grid.msg.data.size());
-      grid_pub.publish(grid.msg);
+      std::string robot_name = type.name;
+      std::string err_str;
+      if (!ros::names::validate(robot_name, err_str)) {
+      	// Sanitize input to remove non alphanumeric characters from robot name
+	ROS_WARN("Grid name is not ROS compatible.");
+      	robot_name.erase(std::remove_if(robot_name.begin(), robot_name.end(),
+                                      []( auto const& c ) -> bool { return !std::isalnum(c); } ), robot_name.end());
+      }
+      grid.msg.header.frame_id = "darpa"; // Only allowed frame is darpa
+      if (robot_name.size() > 0) {
+        std::stringstream ss;
+        ss << "grid/" << robot_name;
+        auto cp_itr = grid_pubs.find(robot_name);
+        if (cp_itr == grid_pubs.end()) {
+          grid_pubs[robot_name] = nh.advertise<nav_msgs::OccupancyGrid>(ss.str().c_str(), 1, true);
+        }
+        grid_pubs[robot_name].publish(grid.msg);
+      } else {  // No name provided
+        grid_pub.publish(grid.msg);
+      }
     }
     else if (type.type == "PointCloud2")
     {
       MapUpdateCloud cloud;
       unpack_cloud(content, cloud);
       ROS_INFO_STREAM("  -> Received cloud message with stamp " << cloud.msg.header.stamp << " and size " << cloud.msg.data.size());
-      cloud_pub.publish(cloud.msg);
+      std::string robot_name = type.name;
+      std::string err_str;
+      if (!ros::names::validate(robot_name, err_str)) {
+      	// Sanitize input to remove non alphanumeric characters
+	ROS_WARN("Cloud name is not ROS compatible.");
+      	robot_name.erase(std::remove_if(robot_name.begin(), robot_name.end(),
+                                      []( auto const& c ) -> bool { return !std::isalnum(c); } ), robot_name.end());
+      }
+      cloud.msg.header.frame_id = "darpa";  // Only frame "darpa" is allowed
+      if (robot_name.size() > 0) {
+        std::stringstream ss;
+        ss << "cloud/" << robot_name;
+        cloud.msg.header.frame_id = "darpa";
+        auto cp_itr = cloud_pubs.find(robot_name);
+        if (cp_itr == cloud_pubs.end()) {
+          cloud_pubs[robot_name] = nh.advertise<sensor_msgs::PointCloud2>(ss.str().c_str(), 1, true);
+        }
+        cloud_pubs[robot_name].publish(cloud.msg);
+      } else {  // No name provided = this is a fused output
+        cloud_pub.publish(cloud.msg);
+      }
+      // Check time between messages
+      ros::Time curr_time = ros::Time::now();
+      if((curr_time - last_cloud_time).toSec() < 1) {
+            throw TooManyRequests("Cloud updates too frequent. Reduce to <1Hz.");
+      }
+      last_cloud_time = curr_time;
     }
     else
     {
@@ -512,16 +561,29 @@ int main(int argc, char **argv)
   auto marker_update = [&](auto& content)
   {
     visualization_msgs::MarkerArray markers;
+    ROS_INFO_STREAM("  -> Received MarkerArray message with " << markers.markers.size() << " markers");
     visualization_msgs::MarkerArray markers_to_send;
     unpack(content, markers);
     // Clear out the rest of the labels (in case poses were deleted)
+    // Also check for incorrect frame.
+    bool incorrect_frame = false;
     for (size_t i = markers.markers.size(); i < last_markers_size2; ++i)
     {
       visualization_msgs::Marker marker;
+      if(marker.header.frame_id != "darpa")
+      {
+        incorrect_frame = true;
+      }
       marker.id = markers.markers.size();
       marker.action = visualization_msgs::Marker::DELETE;
       markers_to_send.markers.push_back(marker);
     }
+
+    if(incorrect_frame)
+    {
+      ROS_ERROR_STREAM("Markers not in 'darpa' frame");
+    }
+
     // Remember this marker count
     last_markers_size2 = markers.markers.size();
     for (size_t i =0; i < markers.markers.size(); i++) {
@@ -540,22 +602,32 @@ int main(int argc, char **argv)
 
     // Unpack our pose array message
     unpack(content, poses);
+
+    ROS_INFO_STREAM("  -> Received PoseArray message with stamp " << poses.header.stamp << " and " << poses.poses.size() << " poses");
+
     // Validate the frame_id
-    if (poses.header.frame_id != "darpa") {
-      std::cout << "Got " << poses.header.frame_id << " instead of darpa frame" << std::endl;
+    if (poses.header.frame_id != "darpa")
+    {
+      ROS_ERROR_STREAM("Poses not in 'darpa' frame (" << poses.header.frame_id << ")");
     }
-//      throw std::runtime_error("If provided, \"header/frame_id\" must be \"darpa\".");
+    // Reset frame to darpa.
     poses.header.frame_id = "darpa";
 
 
     // Unpack platform names
     TelemetryNames names;
     unpack(content, names);
+    bool missing_name = false;
     if (poses.poses.size() != names.poses.size())
-      throw std::runtime_error("Number of poses and number of names don't match.");
-    for (size_t i = 0; i < names.poses.size(); ++i)
+      throw UnprocessableEntity("Number of poses and number of names don't match.");
+    for (size_t i = 0; i < names.poses.size(); ++i) 
+    {
       if (names.poses[i].name.empty())
+      {
         names.poses[i].name = "robot" + std::to_string(i+1);
+	missing_name = true;
+      }
+    }
 
     // Publish the pose array
     poses_pub.publish(poses);
@@ -634,6 +706,10 @@ int main(int argc, char **argv)
     // Remember this marker count
     last_markers_size = markers.markers.size();
     markers_pub.publish(markers);
+
+    // Throw an error if one of the poses is missing a name
+    if(missing_name)
+      	throw UnprocessableEntity("Telemetry is missing a name");
   };
 
   // ------------------------------------------------------------

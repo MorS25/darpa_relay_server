@@ -4,11 +4,12 @@ import rospy
 from nav_msgs.msg import OccupancyGrid
 import array
 import random
+import sys
 
-def test_grid():
-	publisher = rospy.Publisher('slam/grid', OccupancyGrid, queue_size=10)
-	rospy.init_node('test_grid')
-	rate = rospy.Rate(5)
+def test_grid(topic):
+	publisher = rospy.Publisher(topic, OccupancyGrid, queue_size=10)
+	rospy.init_node('test_grid', anonymous=True)
+	rate = rospy.Rate(0.5)
 	while not rospy.is_shutdown():
 		gridmsg = OccupancyGrid()
 		gridmsg.header.stamp = rospy.Time.now()
@@ -25,8 +26,10 @@ def test_grid():
 		rate.sleep()
 
 if __name__ == '__main__':
-	try:
-		test_grid()
-	except rospy.ROSInterruptException:
-		pass
-
+  topic = 'slam/grid'
+  if len(sys.argv) > 1:
+    topic = sys.argv[1]
+  try:
+    test_grid(topic)
+  except rospy.ROSInterruptException:
+    pass

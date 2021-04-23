@@ -16,6 +16,7 @@
 struct MapUpdate
 {
   std::string type;
+  std::string name;
 };
 struct MapUpdateGrid
 {
