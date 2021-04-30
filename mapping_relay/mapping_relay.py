@@ -208,9 +208,7 @@ class CommandPostRelay(object):
         # Update the corresponding robot pose
         robot_ind = args[0]
         robot_name = args[1]
-        self.poses[u'poses'][robot_ind][u'name'] = robot_name
-        self.poses[u'poses'][robot_ind][u'position'] = msg[u'pose'][u'position']
-        self.poses[u'poses'][robot_ind][u'orientation'] = msg[u'pose'][u'orientation']
+        self.poses[u'poses'][robot_ind] = {u'name': robot_name, u'position': msg[u'pose'][u'position'], u'orientation': msg[u'pose'][u'orientation']}
         # Send message
         self.send_plain_msg(u'PoseArray', self.poses, self.state_url)
     
