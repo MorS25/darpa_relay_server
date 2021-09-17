@@ -61,7 +61,7 @@ else:
             d = {}
             for s in obj.__slots__:
                 # in python2, we will have already handled the 'data' bytearray to be the correct type
-                d[s.decode('utf-8')] = getattr(obj, s) if s is 'data' else nested(getattr(obj, s))
+                d[s.decode('utf-8')] = getattr(obj, s) if s == 'data' else nested(getattr(obj, s))
             return d
         elif isinstance(obj, list):
             return map(nested, obj)
@@ -108,9 +108,9 @@ class CommandPostRelay(object):
         self.session = requests.Session()
         self.session.headers['Content-Type']  = 'application/cbor'
         self.session.headers['Authorization'] = 'Bearer ' + self.token
-        if self.compression is 'gzip':
+        if self.compression == 'gzip':
             self.session.headers['Content-Encoding'] = 'gzip'
-        if self.compression is 'none':
+        if self.compression == 'none':
             self.session.headers['Content-Encoding'] = 'identity'
 
         # TF listener
@@ -120,13 +120,13 @@ class CommandPostRelay(object):
         self.grid_subs = []
         self.grid_subs.append(rospy.Subscriber('grid', OccupancyGrid, self.handle_grid, (u'')))
         for robot_name in self.robot_names:
-          self.grid_subs.append(rospy.Subscriber('grid/'+robot_name, OccupancyGrid, self.handle_grid, robot_name.decode("utf-8", "ignore")))
+          self.grid_subs.append(rospy.Subscriber('grid/'+robot_name, OccupancyGrid, self.handle_grid, robot_name))
         
         # Point cloud subscription
         self.cloud_subs = []
         self.cloud_subs.append(rospy.Subscriber('cloud', PointCloud2, self.handle_cloud, (u'')))
         for robot_name in self.robot_names:
-          self.cloud_subs.append(rospy.Subscriber('cloud/'+robot_name, PointCloud2, self.handle_cloud, robot_name.decode("utf-8", "ignore")))
+          self.cloud_subs.append(rospy.Subscriber('cloud/'+robot_name, PointCloud2, self.handle_cloud, robot_name))
         
         # Pose array subscription
         self.posearray_sub = rospy.Subscriber('poses', PoseArray, self.handle_poses)
@@ -134,7 +134,7 @@ class CommandPostRelay(object):
         self.pose_subs = []
         self.poses = nested(PoseArray(poses=[Pose()] * len(self.robot_names)))
         for i, robot_name in enumerate(self.robot_names, start=0):
-            self.pose_subs.append(rospy.Subscriber('poses/'+robot_name, PoseStamped, self.handle_pose, (i, robot_name.decode("utf-8", "ignore"))))
+            self.pose_subs.append(rospy.Subscriber('poses/'+robot_name, PoseStamped, self.handle_pose, (i, robot_name)))
             self.poses[u'poses'][i]['name'] = robot_name
         
         # Marker subscription
@@ -142,7 +142,7 @@ class CommandPostRelay(object):
 
     def send_map_msg(self, typestr, msg, name):
         body = cbor.dumps({u'type' : typestr, u'msg' : msg, u'name' : name})
-        if self.compression is 'gzip':
+        if self.compression == 'gzip':
             body = gzip_compress(body)
             rospy.loginfo('  -> Sending message of size ' + str(len(body)))
         res = self.session.post(self.map_url, body)
@@ -151,7 +151,7 @@ class CommandPostRelay(object):
     
     def send_plain_msg(self, typestr, msg, url):
         body = cbor.dumps(msg)
-        if self.compression is 'gzip':
+        if self.compression == 'gzip':
             body = gzip_compress(body)
         res = self.session.post(url, body)
         if not res.ok:
@@ -191,7 +191,7 @@ class CommandPostRelay(object):
         # Apply robot names if the number of names and poses are equal
         if len(msg[u'poses']) == len(self.robot_names):
             for i, robot_name in enumerate(self.robot_names, start=0):
-                msg[u'poses'][i][u'name'] = robot_name.decode("utf-8", "ignore")
+                msg[u'poses'][i][u'name'] = robot_name
         else: 
             rospy.logerr('Number of poses (' + str(len(msg[u'poses'])) + ') does not equal number of robot names ('+ str(len(self.robot_names)) + ')')
         # Send message

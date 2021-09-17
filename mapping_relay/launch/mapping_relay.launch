@@ -21,7 +21,7 @@
   <arg name="marker_array_topic" default="markers"/>
   
   <!-- robot_names: The list of robot names which will be subscribed to as /cloud/<robot_name_1>, /grid/<robot_name_1>, /poses/<robot_name_1> ... for N robot_names -->
-  <arg name="robot_names" default="[robot1, robot2, robot3]"/>
+  <arg name="robot_names" default="[marmotte]"/>
 
   <node pkg="mapping_relay" type="mapping_relay.py" name="mapping_relay" output="screen">
     <param name="token" value="$(arg token)" />
