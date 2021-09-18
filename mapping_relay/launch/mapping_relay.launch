@@ -23,7 +23,7 @@
   <!-- robot_names: The list of robot names which will be subscribed to as /cloud/<robot_name_1>, /grid/<robot_name_1>, /poses/<robot_name_1> ... for N robot_names -->
   <arg name="robot_names" default="[marmotte]"/>
 
-  <node pkg="mapping_relay" type="mapping_relay.py" name="mapping_relay" output="screen">
+  <node pkg="mapping_relay_2" type="mapping_relay.py" name="mapping_relay" output="screen">
     <param name="token" value="$(arg token)" />
     <param name="map_url" value="http://$(arg mapping_server_ip):8000/map/update" />
     <param name="state_url" value="http://$(arg mapping_server_ip):8000/state/update"/>
