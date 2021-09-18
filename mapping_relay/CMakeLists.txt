@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.1)
-project(mapping_relay_2)
+project(mapping_relay)
 
 set(PKG_DEPENDS
   rospy
